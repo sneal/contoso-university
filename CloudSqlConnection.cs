@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
+﻿using System.Configuration;
 using System.Web.Configuration;
+using Microsoft.Extensions.Configuration;
+using Steeltoe.Extensions.Configuration;
 
 namespace ContosoUniversity
 {
@@ -24,21 +23,32 @@ namespace ContosoUniversity
 
         private static string LoadConnectionString()
         {
-            var vcapServicesRaw = Environment.GetEnvironmentVariable("VCAP_SERVICES");
-            if (string.IsNullOrEmpty(vcapServicesRaw))
+            var connStr = LoadCloudConnectionString();
+            if (string.IsNullOrEmpty(connStr))
             {
-                return WebConfigurationManager.ConnectionStrings["SchoolContext"].ConnectionString;
+                connStr = LoadWebConfigConnectionString();
+                if (string.IsNullOrEmpty(connStr))
+                {
+                    throw new ConfigurationErrorsException(
+                        "No Contoso SQL Server connection string was found. Did you forget to bind the connection string to the app?");
+                }
             }
+            return connStr;
+        }
 
-            Dictionary<string, object> vcapServices = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(vcapServicesRaw);
-            var credentials = ((Newtonsoft.Json.Linq.JArray) vcapServices?["user-provided"])?.First()["credentials"];
-            if (credentials != null)
+        private static string LoadCloudConnectionString()
+        {
+            var config = new ConfigurationBuilder().AddCloudFoundry().Build();
+            if (config["vcap:services:user-provided:0:credentials:name"] == "school")
             {
-                return (string)credentials["connectionString"];
+                return config["vcap:services:user-provided:0:credentials:connectionString"];
             }
+            return "";
+        }
 
-            throw new ConfigurationErrorsException(
-                "No Contoso SQL Server connection string was found. Did you forget to bind the connection string to the app?");                       
+        private static string LoadWebConfigConnectionString()
+        {
+            return WebConfigurationManager.ConnectionStrings["SchoolContext"]?.ConnectionString;
         }
     }
 }
