@@ -1,43 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Configuration;
+using System.Web.Configuration;
+using Microsoft.Extensions.Configuration;
+using Steeltoe.Extensions.Configuration;
 
 namespace ContosoUniversity
 {
     public class CloudSqlConnection
     {
-        private static String actualConnection = String.Empty;
+        private static string actualConnection = string.Empty;
 
-        public static String ConnectionString
+        public static string ConnectionString
         {
             get
             {
-                if (actualConnection == String.Empty)
+                if (string.IsNullOrEmpty(actualConnection))
                 {
-                    loadConnectionString();
+                    actualConnection = LoadConnectionString();
                 }
                 return actualConnection;
             }
         }
 
-        private static void loadConnectionString()
+        private static string LoadConnectionString()
         {
-            Dictionary<string, object> vcapServices = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(
-                Environment.GetEnvironmentVariable("VCAP_SERVICES"));
-            
-            if (vcapServices != null)
+            var connStr = LoadCloudConnectionString();
+            if (string.IsNullOrEmpty(connStr))
             {
-                var credentials = ((Newtonsoft.Json.Linq.JArray)vcapServices["user-provided"]).First()["credentials"];
-                if (credentials != null)
+                connStr = LoadWebConfigConnectionString();
+                if (string.IsNullOrEmpty(connStr))
                 {
-                    actualConnection = (String)credentials["connectionString"];
+                    throw new ConfigurationErrorsException(
+                        "No Contoso SQL Server connection string was found. Did you forget to bind the connection string to the app?");
                 }
             }
+            return connStr;
+        }
 
-           // if (actualConnection == String.Empty) { 
-           //     actualConnection = "provide default string";
-          //  }                        
+        private static string LoadCloudConnectionString()
+        {
+            var config = new ConfigurationBuilder().AddCloudFoundry().Build();
+            if (config["vcap:services:user-provided:0:credentials:name"] == "school")
+            {
+                return config["vcap:services:user-provided:0:credentials:connectionString"];
+            }
+            return "";
+        }
+
+        private static string LoadWebConfigConnectionString()
+        {
+            return WebConfigurationManager.ConnectionStrings["SchoolContext"]?.ConnectionString;
         }
     }
 }
