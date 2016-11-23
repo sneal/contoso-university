@@ -30,7 +30,8 @@ namespace ContosoUniversity
                 if (string.IsNullOrEmpty(connStr))
                 {
                     throw new ConfigurationErrorsException(
-                        "No Contoso SQL Server connection string was found. Did you forget to bind the connection string to the app?");
+                        "No Contoso SQL Server connection string was found. Did you forget to bind the " +
+                        "user provided service named 'schoolcontext' to this app?");
                 }
             }
             return connStr;
@@ -38,10 +39,9 @@ namespace ContosoUniversity
 
         private static string LoadCloudConnectionString()
         {
-            var config = new ConfigurationBuilder().AddCloudFoundry().Build();
-            if (config["vcap:services:user-provided:0:credentials:name"] == "school")
+            if (ServerConfig.Configuration["vcap:services:user-provided:0:credentials:name"] == "school")
             {
-                return config["vcap:services:user-provided:0:credentials:connectionString"];
+                return ServerConfig.Configuration["vcap:services:user-provided:0:credentials:connectionString"];
             }
             return "";
         }
