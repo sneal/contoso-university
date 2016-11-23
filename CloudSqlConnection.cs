@@ -39,7 +39,7 @@ namespace ContosoUniversity
 
         private static string LoadCloudConnectionString()
         {
-            if (ServerConfig.Configuration["vcap:services:user-provided:0:credentials:name"] == "school")
+            if (ServerConfig.Configuration["vcap:services:user-provided:0:name"] == "schoolcontext")
             {
                 return ServerConfig.Configuration["vcap:services:user-provided:0:credentials:connectionString"];
             }
