@@ -14,13 +14,6 @@ namespace ContosoUniversity.DAL
         public DbSet<OfficeAssignment> OfficeAssignments { get; set; }
         public DbSet<Person> People { get; set; }
 
-        // The default constructor override here uses our VCAP_SERVICES connection string
-        // instead of the one found in web.config
-        public SchoolContext() : base()
-        {
-            
-        }
-
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
