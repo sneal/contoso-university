@@ -1,23 +1,21 @@
 ﻿using System.Configuration;
 using System.Web.Configuration;
-using Microsoft.Extensions.Configuration;
-using Steeltoe.Extensions.Configuration;
 
 namespace ContosoUniversity
 {
     public class CloudSqlConnection
     {
-        private static string actualConnection = string.Empty;
+        private static string _actualConnection = string.Empty;
 
         public static string ConnectionString
         {
             get
             {
-                if (string.IsNullOrEmpty(actualConnection))
+                if (string.IsNullOrEmpty(_actualConnection))
                 {
-                    actualConnection = LoadConnectionString();
+                    _actualConnection = LoadConnectionString();
                 }
-                return actualConnection;
+                return _actualConnection;
             }
         }
 
@@ -39,9 +37,10 @@ namespace ContosoUniversity
 
         private static string LoadCloudConnectionString()
         {
-            if (ServerConfig.Configuration["vcap:services:user-provided:0:name"] == "schoolcontext")
+            var cloudConfig = ServerConfig.GetCloudConfig();
+            if (cloudConfig["vcap:services:user-provided:0:name"] == "schoolcontext")
             {
-                return ServerConfig.Configuration["vcap:services:user-provided:0:credentials:connectionString"];
+                return cloudConfig["vcap:services:user-provided:0:credentials:connectionString"];
             }
             return "";
         }

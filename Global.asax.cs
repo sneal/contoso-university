@@ -10,7 +10,6 @@ namespace ContosoUniversity
     {
         protected void Application_Start()
         {
-            ServerConfig.RegisterCloudConfig();
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
