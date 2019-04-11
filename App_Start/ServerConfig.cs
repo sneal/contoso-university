@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Steeltoe.Extensions.Configuration;
+//using Steeltoe.Extensions.Configuration;
 
 namespace ContosoUniversity
 {
@@ -8,9 +8,9 @@ namespace ContosoUniversity
         public static IConfiguration GetCloudConfig()
         {
             return new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                //.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables()
-                .AddCloudFoundry()
+                //.AddCloudFoundry()
                 .Build();
         }
     }

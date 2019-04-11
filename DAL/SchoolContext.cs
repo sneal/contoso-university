@@ -16,7 +16,7 @@ namespace ContosoUniversity.DAL
 
         // The default constructor override here uses our VCAP_SERVICES connection string
         // instead of the one found in web.config
-        public SchoolContext() : base(CloudSqlConnection.ConnectionString)
+        public SchoolContext() : base()
         {
             
         }
