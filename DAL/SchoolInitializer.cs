@@ -2,12 +2,37 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using ContosoUniversity.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace ContosoUniversity.DAL
 {
     public class SchoolInitializer : DropCreateDatabaseIfModelChanges<SchoolContext>
     {
         protected override void Seed(SchoolContext context)
+        {
+            SeedRoles(context);
+            SeedSchoolData(context);
+            context.SaveChanges();
+        }
+
+        private static void SeedRoles(SchoolContext context)
+        {
+            var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(context));
+            EnsureRoleExists(roleManager, SchoolRole.AdminRole);
+            EnsureRoleExists(roleManager, SchoolRole.StudentRole);
+            EnsureRoleExists(roleManager, SchoolRole.FacultyRole);
+        }
+
+        private static void EnsureRoleExists(RoleManager<IdentityRole> roleManager, SchoolRole schoolRole)
+        {
+            if (!roleManager.RoleExists(schoolRole.Name))
+            {
+                roleManager.Create(schoolRole);
+            }
+        }
+
+        private static void SeedSchoolData(SchoolContext context)
         {
             var students = new List<Student>
             {
@@ -72,7 +97,6 @@ namespace ContosoUniversity.DAL
                 new Enrollment {StudentID = 7, CourseID = 3141, Grade = Grade.A}
             };
             enrollments.ForEach(s => context.Enrollments.Add(s));
-            context.SaveChanges();
         }
     }
 }
