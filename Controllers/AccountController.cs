@@ -133,6 +133,9 @@ namespace ContosoUniversity.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    // Everyone registering here is a student, others need to be added by an admin
+                    await UserManager.AddToRoleAsync(user.Id, SchoolRole.StudentRole.Name);
+
                     await SignInManager.SignInAsync(user, false, false);
 
                     // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771

@@ -69,7 +69,7 @@ namespace ContosoUniversity.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = SchoolRole.Admin)]
         public ActionResult Create([Bind(Include = "LastName,FirstMidName,HireDate,OfficeAssignment")]
             Instructor instructor, string[] selectedCourses)
         {
@@ -129,7 +129,7 @@ namespace ContosoUniversity.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = SchoolRole.Admin)]
         public ActionResult Edit(int? id, string[] selectedCourses)
         {
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -199,7 +199,7 @@ namespace ContosoUniversity.Controllers
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = SchoolRole.Admin)]
         public ActionResult DeleteConfirmed(int id)
         {
             var instructor = _db.Instructors

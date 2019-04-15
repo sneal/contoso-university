@@ -6,8 +6,12 @@ namespace ContosoUniversity.Models
     {
         public SchoolRole(string name) : base(name) { }
 
-        public static readonly SchoolRole AdminRole = new SchoolRole("admin");
-        public static readonly SchoolRole StudentRole = new SchoolRole("student");
-        public static readonly SchoolRole FacultyRole = new SchoolRole("faculty");
+        public const string Admin = "admin";
+        public const string Student = "student";
+        public const string Faculty = "faculty";
+
+        public static readonly SchoolRole AdminRole = new SchoolRole(Admin);
+        public static readonly SchoolRole StudentRole = new SchoolRole(Student);
+        public static readonly SchoolRole FacultyRole = new SchoolRole(Faculty);
     }
 }
