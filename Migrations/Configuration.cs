@@ -4,6 +4,8 @@ using System.Data.Entity.Migrations;
 using System.Linq;
 using ContosoUniversity.DAL;
 using ContosoUniversity.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace ContosoUniversity.Migrations
 {
@@ -15,6 +17,31 @@ namespace ContosoUniversity.Migrations
         }
 
         protected override void Seed(SchoolContext context)
+        {
+            SeedRoles(context);
+            SeedSchoolData(context);
+        }
+
+
+        private void SeedRoles(SchoolContext context)
+        {
+            var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(context));
+            context.Roles.AddOrUpdate();
+            EnsureRoleExists(roleManager, SchoolRole.AdminRole);
+            EnsureRoleExists(roleManager, SchoolRole.StudentRole);
+            EnsureRoleExists(roleManager, SchoolRole.FacultyRole);
+            context.SaveChanges();
+        }
+
+        private static void EnsureRoleExists(RoleManager<IdentityRole> roleManager, SchoolRole schoolRole)
+        {
+            if (!roleManager.RoleExists(schoolRole.Name))
+            {
+                roleManager.Create(new IdentityRole(schoolRole.Name));
+            }
+        }
+
+        private void SeedSchoolData(SchoolContext context)
         {
             var students = new List<Student>
             {
