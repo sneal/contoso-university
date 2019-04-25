@@ -346,6 +346,7 @@
       <DependentUpon>201904241830512_principalid.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Services\UserService.cs" />
     <Compile Include="ViewModels\Account.cs" />
     <Compile Include="Models\Course.cs" />
     <Compile Include="Models\Department.cs" />

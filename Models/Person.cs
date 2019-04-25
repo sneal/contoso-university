@@ -7,6 +7,9 @@ namespace ContosoUniversity.Models
     {
         public int ID { get; set; }
 
+        [StringLength(128)]
+        public string PrincipalID { get; set; }
+
         [Required]
         [StringLength(50)]
         [Display(Name = "Last Name")]
@@ -18,6 +21,7 @@ namespace ContosoUniversity.Models
         [Display(Name = "First Name")]
         public string FirstMidName { get; set; }
 
-        [Display(Name = "Full Name")] public string FullName => LastName + ", " + FirstMidName;
+        [Display(Name = "Full Name")]
+        public string FullName => LastName + ", " + FirstMidName;
     }
 }
