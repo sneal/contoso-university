@@ -4,40 +4,51 @@
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>My Class Registrations</h2>
 
 <p>
     @Html.ActionLink("Register", "Register")
 </p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Course.Title)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Student.LastName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Grade)
-        </th>
-        <th></th>
-    </tr>
+<form method="post">
+    @Html.AntiForgeryToken()
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Course.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Course.Department.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Course.Credits)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Grade)
+            </th>
+            <th></th>
+        </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Course.Title)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Student.LastName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Grade)
-        </td>
-        <td>
-            @Html.ActionLink("Delete", "Delete", new { id=item.EnrollmentID })
-        </td>
-    </tr>
-}
+        @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Course.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Course.Department.Name)
+                </td>
+                <th>
+                    @Html.DisplayFor(modelItem => item.Course.Credits)
+                </th>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Grade)
+                </td>
+                <td>
+                    @if (item.Grade == null) {
+                    <button type="submit" formaction='@Url.Action("Delete", "Registration", new {enrollmentID = item.EnrollmentID})'>Deregister</button>
+                    }
+                </td>
+            </tr>
+        }
 
-</table>
+    </table>
+</form>

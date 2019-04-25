@@ -9,7 +9,9 @@ namespace ContosoUniversity.Models
     {
         public int DepartmentID { get; set; }
 
-        [StringLength(50, MinimumLength = 3)] public string Name { get; set; }
+        [StringLength(50, MinimumLength = 3)]
+        [Display(Name = "Department Name")]
+        public string Name { get; set; }
 
         [DataType(DataType.Currency)]
         [Column(TypeName = "money")]

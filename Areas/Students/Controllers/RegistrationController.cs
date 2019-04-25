@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Net;
 using System.Web.Mvc;
 using ContosoUniversity.DAL;
 using ContosoUniversity.Models;
@@ -14,28 +15,58 @@ namespace ContosoUniversity.Areas.Students.Controllers
         [Authorize(Roles = SchoolRole.Student)]
         public ActionResult Index()
         {
-            var principalID = User.Identity.GetUserId();
-            var student = _db.Students.SingleOrDefault(s => s.PrincipalID == principalID);
-            var enrollments = _db.Enrollments.Where(e => e.StudentID == student.ID);
+            var studentID = CurrentStudent().ID;
+            var enrollments = _db.Enrollments.Where(e => e.StudentID == studentID);
             return View(enrollments);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = SchoolRole.Student)]
-        public ActionResult Delete()
+        public ActionResult Delete(int enrollmentID)
         {
-            // TODO delete
-            return View("Index");
+            var enrollment = _db.Enrollments.SingleOrDefault(e => e.EnrollmentID == enrollmentID);
+            if (enrollment == null) return HttpNotFound();
+            if (enrollment.Grade != null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            _db.Enrollments.Remove(enrollment);
+            _db.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = SchoolRole.Student)]
+        public ActionResult Register()
+        {
+            return View("Courses", _db.Courses);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = SchoolRole.Student)]
-        public ActionResult Register()
+        public ActionResult Register(int courseID)
         {
-            // TODO register/add class
-            return View("Index");
+            var newCourse = _db.Courses.SingleOrDefault(c => c.CourseID == courseID);
+            if (newCourse == null) return HttpNotFound();
+
+            var student = CurrentStudent();
+            var newEnrollment = new Enrollment
+            {
+                CourseID = courseID,
+                StudentID = student.ID
+            };
+            if (student.Enrollments.Add(newEnrollment))
+            {
+                _db.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        private Student CurrentStudent()
+        {
+            var principalID = User.Identity.GetUserId();
+            return _db.Students.Single(s => s.PrincipalID == principalID);
         }
     }
 }

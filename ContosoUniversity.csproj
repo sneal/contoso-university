@@ -388,6 +388,7 @@
     <Content Include="Areas\Students\Views\_ViewStart.cshtml" />
     <Content Include="Areas\Students\Views\Home\Index.cshtml" />
     <Content Include="Areas\Students\Views\Registration\Index.cshtml" />
+    <Content Include="Areas\Students\Views\Registration\Courses.cshtml" />
     <None Include="packages.config" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\bootstrap.js" />
