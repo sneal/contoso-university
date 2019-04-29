@@ -15,6 +15,7 @@ namespace ContosoUniversity.UnitTests
         private readonly Student _currentStudent;
         private readonly Course _algrebraCourse;
         private readonly Department _mathDepartment;
+        private readonly Enrollment _currentStudentAlgebraEnrollment;
 
         public RegistrationControllerTests()
         {
@@ -47,13 +48,13 @@ namespace ContosoUniversity.UnitTests
             };
             _schoolContext.Students.Add(_currentStudent);
 
-            var enrollment = new Enrollment
+            _currentStudentAlgebraEnrollment = new Enrollment
             {
                 Course = _algrebraCourse,
                 Student = _currentStudent,
                 Grade = Grade.B
             };
-            _schoolContext.Enrollments.Add(enrollment);
+            _schoolContext.Enrollments.Add(_currentStudentAlgebraEnrollment);
 
             var instructor = new Instructor
             {
@@ -112,7 +113,6 @@ namespace ContosoUniversity.UnitTests
             Assert.Equal(_currentStudent, enrollments.First().Student);
         }
 
-
         [Fact]
         public void Register_shows_all_courses()
         {
@@ -135,6 +135,113 @@ namespace ContosoUniversity.UnitTests
             Assert.Equal(2, courses.Count());
             Assert.Contains(_algrebraCourse, courses);
             Assert.Contains(statisticsCourse, courses);
+        }
+
+        [Fact]
+        public void Register_returns_404_when_course_not_found()
+        {
+            var controller = new RegistrationController(_schoolContext);
+            controller.CurrentStudent = () => _currentStudent;
+
+            var notFound = controller.Register(44);
+            Assert.IsType<HttpNotFoundResult>(notFound);
+        }
+
+        [Fact]
+        public void Register_creates_an_enrollment()
+        {
+            var statisticsCourse = new Course
+            {
+                CourseID = 2,
+                Department = _mathDepartment,
+                Credits = 5,
+                Title = "Statistics"
+            };
+            _schoolContext.Courses.Add(statisticsCourse);
+            _schoolContext.SaveChanges();
+
+            var controller = new RegistrationController(_schoolContext);
+            controller.CurrentStudent = () => _currentStudent;
+
+            controller.Register(statisticsCourse.CourseID);
+            Assert.Contains(new Enrollment {CourseID = statisticsCourse.CourseID, StudentID = _currentStudent.ID},
+                _schoolContext.Enrollments);
+        }
+
+        [Fact]
+        public void Register_is_idempotent()
+        {
+            var controller = new RegistrationController(_schoolContext);
+            controller.CurrentStudent = () => _currentStudent;
+
+            Assert.Single(_schoolContext.Enrollments);
+
+            controller.Register(_algrebraCourse.CourseID);
+
+            Assert.Single(_schoolContext.Enrollments);
+            Assert.Contains(new Enrollment { CourseID = _algrebraCourse.CourseID, StudentID = _currentStudent.ID },
+                _schoolContext.Enrollments);
+        }
+
+        [Fact]
+        public void Register_redirects_to_index()
+        {
+            var controller = new RegistrationController(_schoolContext);
+            controller.CurrentStudent = () => _currentStudent;
+
+            var redirect = (RedirectToRouteResult) controller.Register(_algrebraCourse.CourseID);
+
+            Assert.Equal("Index", redirect.RouteValues["action"]);
+        }
+
+        [Fact]
+        public void Delete_redirects_to_index()
+        {
+            var controller = new RegistrationController(_schoolContext);
+            controller.CurrentStudent = () => _currentStudent;
+
+            // can't delete a enrollment which has a grade
+            _currentStudentAlgebraEnrollment.Grade = null;
+            _schoolContext.SaveChanges();
+
+            var redirect = (RedirectToRouteResult)controller.Delete(_currentStudentAlgebraEnrollment.EnrollmentID);
+
+            Assert.Equal("Index", redirect.RouteValues["action"]);
+        }
+
+        [Fact]
+        public void Delete_returns_400_when_student_has_a_grade_in_the_class()
+        {
+            var controller = new RegistrationController(_schoolContext);
+            controller.CurrentStudent = () => _currentStudent;
+
+            var badRequest = (HttpStatusCodeResult) controller.Delete(_currentStudentAlgebraEnrollment.EnrollmentID);
+            Assert.Equal(400, badRequest.StatusCode);
+        }
+        
+        [Fact]
+        public void Delete_returns_404_when_enrollment_is_not_found()
+        {
+            var controller = new RegistrationController(_schoolContext);
+            controller.CurrentStudent = () => _currentStudent;
+
+            var notFound = controller.Delete(44);
+            Assert.IsType<HttpNotFoundResult>(notFound);
+        }
+
+        [Fact]
+        public void Delete_unenrolls_the_current_student()
+        {
+            var controller = new RegistrationController(_schoolContext);
+            controller.CurrentStudent = () => _currentStudent;
+
+            // can't delete a enrollment which has a grade
+            _currentStudentAlgebraEnrollment.Grade = null;
+            _schoolContext.SaveChanges();
+
+            var redirect = (RedirectToRouteResult)controller.Delete(_currentStudentAlgebraEnrollment.EnrollmentID);
+
+            Assert.DoesNotContain(_currentStudentAlgebraEnrollment, _schoolContext.Enrollments);
         }
     }
 }

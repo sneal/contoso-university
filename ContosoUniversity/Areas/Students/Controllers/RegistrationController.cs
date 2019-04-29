@@ -65,8 +65,9 @@ namespace ContosoUniversity.Areas.Students.Controllers
                 CourseID = courseID,
                 StudentID = student.ID
             };
-            if (student.Enrollments.Add(newEnrollment))
+            if (!_db.Enrollments.Any(e => e.StudentID == student.ID && e.CourseID == courseID))
             {
+                student.Enrollments.Add(newEnrollment);
                 _db.SaveChanges();
             }
 
