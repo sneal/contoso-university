@@ -3,8 +3,8 @@ applications:
 - name: contoso
   memory: 1024m
   stack: windows2016
-  buildpack: hwc_buildpack
+  buildpacks:
+  - hwc_buildpack
   health-check-type: http
-  random-route: true
   services:
-  - schoolcontext
+  - SchoolContext
