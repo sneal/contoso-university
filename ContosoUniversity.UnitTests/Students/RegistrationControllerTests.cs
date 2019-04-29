@@ -11,11 +11,13 @@ namespace ContosoUniversity.UnitTests
 {
     public class RegistrationControllerTests
     {
-        [Fact]
-        public void Index_shows_all_enrollments_for_current_user()
+        private readonly SchoolContext _schoolContext;
+        private readonly Student _student;
+
+        public RegistrationControllerTests()
         {
             var connection = Effort.DbConnectionFactory.CreateTransient();
-            var schoolContext = new SchoolContext(connection);
+            _schoolContext = new SchoolContext(connection);
 
             var department = new Department
             {
@@ -23,7 +25,7 @@ namespace ContosoUniversity.UnitTests
                 StartDate = DateTime.Now,
                 Budget = 100m,
             };
-            schoolContext.Departments.Add(department);
+            _schoolContext.Departments.Add(department);
 
             var course = new Course
             {
@@ -31,24 +33,24 @@ namespace ContosoUniversity.UnitTests
                 Credits = 4,
                 Title = "Algebra"
             };
-            schoolContext.Courses.Add(course);
+            _schoolContext.Courses.Add(course);
 
-            var student = new Student
+            _student = new Student
             {
                 EnrollmentDate = DateTime.Now,
                 FirstMidName = "John",
                 LastName = "Smith",
                 PrincipalID = Guid.NewGuid().ToString()
             };
-            schoolContext.Students.Add(student);
+            _schoolContext.Students.Add(_student);
 
             var enrollment = new Enrollment
             {
                 Course = course,
-                Student = student,
+                Student = _student,
                 Grade = Grade.B
             };
-            schoolContext.Enrollments.Add(enrollment);
+            _schoolContext.Enrollments.Add(enrollment);
 
             var instructor = new Instructor
             {
@@ -57,11 +59,16 @@ namespace ContosoUniversity.UnitTests
                 LastName = "Johnson",
                 PrincipalID = Guid.NewGuid().ToString()
             };
-            schoolContext.Instructors.Add(instructor);
-            schoolContext.SaveChanges();
+            _schoolContext.Instructors.Add(instructor);
+            _schoolContext.SaveChanges();
+        }
 
-            var controller = new RegistrationController(schoolContext);
-            controller.CurrentStudent = () => student;
+        [Fact]
+        public void Index_shows_all_enrollments_for_current_user()
+        {
+     
+            var controller = new RegistrationController(_schoolContext);
+            controller.CurrentStudent = () => _student;
 
             var view = (ViewResult) controller.Index();
             var enrollments = (IEnumerable<Enrollment>) view.Model;
