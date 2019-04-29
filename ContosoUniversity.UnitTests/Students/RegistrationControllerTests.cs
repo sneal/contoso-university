@@ -16,6 +16,7 @@ namespace ContosoUniversity.UnitTests
         private readonly Course _algrebraCourse;
         private readonly Department _mathDepartment;
         private readonly Enrollment _currentStudentAlgebraEnrollment;
+        private readonly RegistrationController _controller;
 
         public RegistrationControllerTests()
         {
@@ -65,15 +66,15 @@ namespace ContosoUniversity.UnitTests
             };
             _schoolContext.Instructors.Add(instructor);
             _schoolContext.SaveChanges();
+
+            _controller = new RegistrationController(_schoolContext);
+            _controller.CurrentStudent = () => _currentStudent;
         }
 
         [Fact]
         public void Index_shows_enrollment_for_current_student()
         {
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
-            var view = (ViewResult) controller.Index();
+            var view = (ViewResult) _controller.Index();
             var enrollments = (IEnumerable<Enrollment>) view.Model;
 
             Assert.Single(enrollments);
@@ -103,10 +104,7 @@ namespace ContosoUniversity.UnitTests
             _schoolContext.Enrollments.Add(enrollment);
             _schoolContext.SaveChanges();
 
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
-            var view = (ViewResult)controller.Index();
+            var view = (ViewResult) _controller.Index();
             var enrollments = (IEnumerable<Enrollment>)view.Model;
 
             Assert.Single(enrollments);
@@ -126,10 +124,7 @@ namespace ContosoUniversity.UnitTests
             _schoolContext.Courses.Add(statisticsCourse);
             _schoolContext.SaveChanges();
 
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
-            var view = (ViewResult)controller.Register();
+            var view = (ViewResult) _controller.Register();
             var courses = (IEnumerable<Course>)view.Model;
 
             Assert.Equal(2, courses.Count());
@@ -140,10 +135,7 @@ namespace ContosoUniversity.UnitTests
         [Fact]
         public void Register_returns_404_when_course_not_found()
         {
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
-            var notFound = controller.Register(44);
+            var notFound = _controller.Register(44);
             Assert.IsType<HttpNotFoundResult>(notFound);
         }
 
@@ -160,10 +152,7 @@ namespace ContosoUniversity.UnitTests
             _schoolContext.Courses.Add(statisticsCourse);
             _schoolContext.SaveChanges();
 
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
-            controller.Register(statisticsCourse.CourseID);
+            _controller.Register(statisticsCourse.CourseID);
             Assert.Contains(new Enrollment {CourseID = statisticsCourse.CourseID, StudentID = _currentStudent.ID},
                 _schoolContext.Enrollments);
         }
@@ -171,12 +160,9 @@ namespace ContosoUniversity.UnitTests
         [Fact]
         public void Register_is_idempotent()
         {
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
             Assert.Single(_schoolContext.Enrollments);
 
-            controller.Register(_algrebraCourse.CourseID);
+            _controller.Register(_algrebraCourse.CourseID);
 
             Assert.Single(_schoolContext.Enrollments);
             Assert.Contains(new Enrollment { CourseID = _algrebraCourse.CourseID, StudentID = _currentStudent.ID },
@@ -186,10 +172,7 @@ namespace ContosoUniversity.UnitTests
         [Fact]
         public void Register_redirects_to_index()
         {
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
-            var redirect = (RedirectToRouteResult) controller.Register(_algrebraCourse.CourseID);
+            var redirect = (RedirectToRouteResult) _controller.Register(_algrebraCourse.CourseID);
 
             Assert.Equal("Index", redirect.RouteValues["action"]);
         }
@@ -197,14 +180,11 @@ namespace ContosoUniversity.UnitTests
         [Fact]
         public void Delete_redirects_to_index()
         {
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
             // can't delete a enrollment which has a grade
             _currentStudentAlgebraEnrollment.Grade = null;
             _schoolContext.SaveChanges();
 
-            var redirect = (RedirectToRouteResult)controller.Delete(_currentStudentAlgebraEnrollment.EnrollmentID);
+            var redirect = (RedirectToRouteResult) _controller.Delete(_currentStudentAlgebraEnrollment.EnrollmentID);
 
             Assert.Equal("Index", redirect.RouteValues["action"]);
         }
@@ -212,34 +192,25 @@ namespace ContosoUniversity.UnitTests
         [Fact]
         public void Delete_returns_400_when_student_has_a_grade_in_the_class()
         {
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
-            var badRequest = (HttpStatusCodeResult) controller.Delete(_currentStudentAlgebraEnrollment.EnrollmentID);
+            var badRequest = (HttpStatusCodeResult) _controller.Delete(_currentStudentAlgebraEnrollment.EnrollmentID);
             Assert.Equal(400, badRequest.StatusCode);
         }
         
         [Fact]
         public void Delete_returns_404_when_enrollment_is_not_found()
         {
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
-            var notFound = controller.Delete(44);
+            var notFound = _controller.Delete(44);
             Assert.IsType<HttpNotFoundResult>(notFound);
         }
 
         [Fact]
         public void Delete_unenrolls_the_current_student()
         {
-            var controller = new RegistrationController(_schoolContext);
-            controller.CurrentStudent = () => _currentStudent;
-
             // can't delete a enrollment which has a grade
             _currentStudentAlgebraEnrollment.Grade = null;
             _schoolContext.SaveChanges();
 
-            var redirect = (RedirectToRouteResult)controller.Delete(_currentStudentAlgebraEnrollment.EnrollmentID);
+            var redirect = (RedirectToRouteResult) _controller.Delete(_currentStudentAlgebraEnrollment.EnrollmentID);
 
             Assert.DoesNotContain(_currentStudentAlgebraEnrollment, _schoolContext.Enrollments);
         }
