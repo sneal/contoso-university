@@ -1,8 +1,14 @@
 ﻿using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Data.SqlClient;
+using System.Linq;
 using ContosoUniversity.Models;
 using Microsoft.AspNet.Identity.EntityFramework;
+using PivotalServices.CloudFoundryShims;
+using Steeltoe.CloudFoundry.Connector;
+using Steeltoe.CloudFoundry.Connector.Services;
+using Steeltoe.CloudFoundry.Connector.SqlServer;
 
 namespace ContosoUniversity.DAL
 {
@@ -22,6 +28,17 @@ namespace ContosoUniversity.DAL
 
         public static SchoolContext Create()
         {
+            var config = ServerConfig.GetConfiguration();
+            var sqlServerInfo = config.GetServiceInfos<SqlServerServiceInfo>().FirstOrDefault();
+            if (sqlServerInfo != null)
+            {
+                var sqlConnectorOptions = new SqlServerProviderConnectorOptions(config);
+                var sqlConnectorFactory = new SqlServerProviderConnectorFactory(
+                    sqlServerInfo, sqlConnectorOptions, typeof(SqlConnection));
+                var connection = new SqlConnection(sqlConnectorFactory.CreateConnectionString());
+                return new SchoolContext(connection);
+            }
+
             return new SchoolContext();
         }
 
