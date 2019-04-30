@@ -19,8 +19,17 @@ namespace ContosoUniversity.Services
 
         public void CreateStudent(string firstName, string lastName, string password = "keepitsimple")
         {
-            var hashedPassword = _passwordHasher.HashPassword(password);
+            Console.WriteLine($"Creating student {firstName} {lastName}");
+            
             var email = $"{firstName[0]}{lastName}@contoso.edu".ToLowerInvariant();
+            var existingUser = _userManager.FindByEmail(email);
+            if (existingUser != null)
+            {
+                Console.WriteLine("User already exists, skipping");
+                return;
+            }
+
+            var hashedPassword = _passwordHasher.HashPassword(password);
             var principalID = Guid.NewGuid().ToString();
 
             _userManager.Create(new SchoolUser
@@ -30,8 +39,10 @@ namespace ContosoUniversity.Services
                 Id = principalID,
                 PasswordHash = hashedPassword
             });
+            Console.WriteLine($"Adding student to student role");
             _userManager.AddToRole(principalID, SchoolRole.Student);
 
+            Console.WriteLine($"Creating student record");
             var student = new Student
             {
                 EnrollmentDate = DateTime.Now,
@@ -45,8 +56,17 @@ namespace ContosoUniversity.Services
 
         public void CreateInstructor(string firstName, string lastName, string password = "keepitsimple")
         {
-            var hashedPassword = _passwordHasher.HashPassword(password);
+            Console.WriteLine($"Creating instructor {firstName} {lastName}");
+
             var email = $"{firstName[0]}{lastName}@contoso.edu".ToLowerInvariant();
+            var existingUser = _userManager.FindByEmail(email);
+            if (existingUser != null)
+            {
+                Console.WriteLine("User already exists, skipping");
+                return;
+            }
+
+            var hashedPassword = _passwordHasher.HashPassword(password);
             var principalID = Guid.NewGuid().ToString();
 
             _userManager.Create(new SchoolUser
