@@ -28,12 +28,6 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: '$(Build.SourcesDirectory)\\ContosoUniversity'
-    Contents: 'manifest.yml'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
 - task: VSTest@2
   inputs:
     platform: '$(buildPlatform)'
