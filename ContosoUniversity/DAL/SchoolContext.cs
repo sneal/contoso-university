@@ -23,11 +23,11 @@ namespace ContosoUniversity.DAL
         public DbSet<OfficeAssignment> OfficeAssignments { get; set; }
         public DbSet<Person> People { get; set; }
 
-        public SchoolContext(DbConnection connection) : base(connection, true) { } 
+        public SchoolContext(DbConnection connection) : base(connection, true) { }
 
-        public SchoolContext() : base("SchoolContext") { }
+        public SchoolContext() : this(CreateConnection()) { }
 
-        public static SchoolContext Create()
+        private static DbConnection CreateConnection()
         {
             var appsettings = new Dictionary<string, string>()
             {
@@ -45,10 +45,15 @@ namespace ContosoUniversity.DAL
                 var sqlConnectorOptions = new SqlServerProviderConnectorOptions(config);
                 var sqlConnectorFactory = new SqlServerProviderConnectorFactory(
                     sqlServerInfo, sqlConnectorOptions, typeof(SqlConnection));
-                var connection = new SqlConnection(sqlConnectorFactory.CreateConnectionString());
-                return new SchoolContext(connection);
+                return new SqlConnection(sqlConnectorFactory.CreateConnectionString());
             }
 
+            var connStr = config.GetConnectionString("SchoolContext");
+            return new SqlConnection(connStr);
+        }
+
+        public static SchoolContext Create()
+        {
             return new SchoolContext();
         }
 
