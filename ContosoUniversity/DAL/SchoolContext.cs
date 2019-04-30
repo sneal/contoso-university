@@ -51,7 +51,11 @@ namespace ContosoUniversity.DAL
                 var sqlConnectorOptions = new SqlServerProviderConnectorOptions(config);
                 var sqlConnectorFactory = new SqlServerProviderConnectorFactory(
                     sqlServerInfo, sqlConnectorOptions, typeof(SqlConnection));
-                return new SqlConnection(sqlConnectorFactory.CreateConnectionString());
+
+                var sqlConnectionStringBuilder = new SqlConnectionStringBuilder(sqlConnectorFactory.CreateConnectionString());
+                sqlConnectionStringBuilder.MultipleActiveResultSets = true;
+
+                return new SqlConnection(sqlConnectionStringBuilder.ToString());
             }
 
             var connStr = ConfigurationManager.ConnectionStrings["SchoolContext"];
