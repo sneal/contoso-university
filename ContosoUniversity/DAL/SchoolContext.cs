@@ -1,14 +1,15 @@
-﻿using System.Data.Common;
+﻿using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Data.SqlClient;
-using System.Linq;
 using ContosoUniversity.Models;
 using Microsoft.AspNet.Identity.EntityFramework;
-using PivotalServices.CloudFoundryShims;
+using Microsoft.Extensions.Configuration;
 using Steeltoe.CloudFoundry.Connector;
 using Steeltoe.CloudFoundry.Connector.Services;
 using Steeltoe.CloudFoundry.Connector.SqlServer;
+using Steeltoe.Extensions.Configuration.CloudFoundry;
 
 namespace ContosoUniversity.DAL
 {
@@ -28,8 +29,17 @@ namespace ContosoUniversity.DAL
 
         public static SchoolContext Create()
         {
-            var config = ServerConfig.GetConfiguration();
-            var sqlServerInfo = config.GetServiceInfos<SqlServerServiceInfo>().FirstOrDefault();
+            var appsettings = new Dictionary<string, string>()
+            {
+                ["sqlserver:client:urlEncodedCredentials"] = "true"
+            };
+            ConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.AddCloudFoundry();
+            builder.AddEnvironmentVariables();
+            builder.AddInMemoryCollection(appsettings);
+            var config = builder.Build();
+
+            var sqlServerInfo = config.GetSingletonServiceInfo<SqlServerServiceInfo>();
             if (sqlServerInfo != null)
             {
                 var sqlConnectorOptions = new SqlServerProviderConnectorOptions(config);
