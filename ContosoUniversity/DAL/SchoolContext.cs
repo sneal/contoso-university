@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Web.Configuration;
 using ContosoUniversity.Models;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Extensions.Configuration;
@@ -23,20 +27,22 @@ namespace ContosoUniversity.DAL
         public DbSet<OfficeAssignment> OfficeAssignments { get; set; }
         public DbSet<Person> People { get; set; }
 
-        public SchoolContext(DbConnection connection) : base(connection, true) { }
+        public SchoolContext(DbConnection connection) : base(connection, true)
+        {
+            Console.WriteLine($"Contoso connection string: {connection.ConnectionString}");
+        }
 
         public SchoolContext() : this(CreateConnection()) { }
 
         private static DbConnection CreateConnection()
         {
-            var appsettings = new Dictionary<string, string>()
+            var appSettings = new Dictionary<string, string>()
             {
                 ["sqlserver:client:urlEncodedCredentials"] = "true"
             };
-            ConfigurationBuilder builder = new ConfigurationBuilder();
+            var builder = new ConfigurationBuilder();
             builder.AddCloudFoundry();
-            builder.AddEnvironmentVariables();
-            builder.AddInMemoryCollection(appsettings);
+            builder.AddInMemoryCollection(appSettings);
             var config = builder.Build();
 
             var sqlServerInfo = config.GetSingletonServiceInfo<SqlServerServiceInfo>();
@@ -48,8 +54,13 @@ namespace ContosoUniversity.DAL
                 return new SqlConnection(sqlConnectorFactory.CreateConnectionString());
             }
 
-            var connStr = config.GetConnectionString("SchoolContext");
-            return new SqlConnection(connStr);
+            var connStr = ConfigurationManager.ConnectionStrings["SchoolContext"];
+            if (connStr == null || string.IsNullOrEmpty(connStr.ConnectionString))
+            {
+                throw new ConfigurationErrorsException(
+                    "Missing bound SQL service instance and/or 'SchoolContext' connection string");
+            }
+            return new SqlConnection(connStr.ConnectionString);
         }
 
         public static SchoolContext Create()
