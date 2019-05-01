@@ -17,12 +17,15 @@ namespace ContosoUniversity.SmokeTests
             var opt = new ChromeOptions();
             opt.AddArgument("headless");
             _driver = new ChromeDriver(opt);
+            _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
             _appUrl = new AppRoute().Url();
             if (string.IsNullOrEmpty(_appUrl))
             {
                 _appUrl = DefaultAppUrl;
             }
+
+            Console.WriteLine($"Using app URL: {_appUrl}");
         }
 
         [Fact]
