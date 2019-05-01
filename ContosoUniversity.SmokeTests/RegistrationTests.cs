@@ -1,7 +1,6 @@
 ﻿using System;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.IE;
 using Xunit;
 
 namespace ContosoUniversity.SmokeTests
@@ -15,7 +14,9 @@ namespace ContosoUniversity.SmokeTests
 
         public RegistrationTests()
         {
-            _driver = new InternetExplorerDriver();
+            var opt = new ChromeOptions();
+            opt.AddArgument("headless");
+            _driver = new ChromeDriver(opt);
 
             _appUrl = new AppRoute().Url();
             if (string.IsNullOrEmpty(_appUrl))
