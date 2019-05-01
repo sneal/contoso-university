@@ -37,7 +37,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourceDirectory)\ContosoUniversity.SmokeTests\bin\$(buildConfiguration)'
+    SourceFolder: '$(System.DefaultWorkingDirectory)\ContosoUniversity.SmokeTests\bin\$(buildConfiguration)'
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
