@@ -7,12 +7,20 @@ namespace ContosoUniversity.SmokeTests
 {
     public class RegistrationTests : IDisposable
     {
+        private const string DefaultAppUrl = "http://localhost:41787/";
+
         private readonly IWebDriver _driver;
-        private string _appUrl = "http://localhost:41787/";
+        private readonly string _appUrl;
 
         public RegistrationTests()
         {
             _driver = new ChromeDriver();
+
+            _appUrl = new AppRoute().Url();
+            if (string.IsNullOrEmpty(_appUrl))
+            {
+                _appUrl = DefaultAppUrl;
+            }
         }
 
         [Fact]
