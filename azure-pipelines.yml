@@ -33,7 +33,7 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     codeCoverageEnabled: true
-    testAssemblyVer2: '**\*UnitTests.dll!**\*TestAdapter.dll!**\obj\**'
+    testAssemblyVer2: '**\$(buildConfiguration)\*UnitTests.dll'
 
 - task: PublishBuildArtifacts@1
   inputs:
