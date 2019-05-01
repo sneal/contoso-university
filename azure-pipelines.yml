@@ -35,6 +35,12 @@ steps:
     codeCoverageEnabled: true
     testAssemblyVer2: '**\$(buildConfiguration)\*UnitTests.dll'
 
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourceDirectory)\ContosoUniversity.SmokeTests\bin\$(buildConfiguration)'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
 - task: PublishBuildArtifacts@1
   inputs:
     ArtifactName: 'contoso-web'
