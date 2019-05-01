@@ -31,7 +31,7 @@ namespace ContosoUniversity.SmokeTests
                 return string.Empty;
             }
 
-            return new Uri($"https://{app.Uris.First()}").ToString();
+            return new Uri($"http://{app.Uris.First()}").ToString();
         }
     }
 

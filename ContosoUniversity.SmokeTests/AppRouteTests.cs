@@ -32,7 +32,7 @@ namespace ContosoUniversity.SmokeTests
         public void Can_parse_route_from_vcap_application()
         {
             var ar = new AppRoute(VcapApplication);
-            Assert.Equal("https://contoso.apps.example.com/", ar.Url());
+            Assert.Equal("http://contoso.apps.example.com/", ar.Url());
         }
 
         [Theory]
