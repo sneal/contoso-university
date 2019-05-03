@@ -22,6 +22,7 @@ steps:
     restoreSolution: '$(solution)'
 
 - task: VSBuild@1
+  displayName: Compile and Package
   inputs:
     solution: '$(solution)'
     msbuildArgs: '/p:DeployDefaultTarget=WebPublish /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PackageAsSingleFile=false /p:SkipInvalidConfigurations=true /p:PublishUrl="$(Build.ArtifactStagingDirectory)/website"'
@@ -29,6 +30,7 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: VSTest@2
+  displayName: Unit Tests
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
@@ -37,10 +39,11 @@ steps:
     testAssemblyVer2: '**\$(buildConfiguration)\*UnitTests.dll'
 
 - task: CopyFiles@2
+  displayName: Package Smoke Tests
   inputs:
     SourceFolder: '$(System.DefaultWorkingDirectory)\ContosoUniversity.SmokeTests\bin\$(buildConfiguration)'
     Contents: '**'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/smoketests'
 
 - task: PublishBuildArtifacts@1
   inputs:
